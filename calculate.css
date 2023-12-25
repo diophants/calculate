@@ -16,7 +16,7 @@ button {
 .display {
   width: 430px;
   height: 932px;
-  background-color: black;
+  background-color: rgb(3, 0, 3);
   text-align: center;
 }
 
