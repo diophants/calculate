@@ -1,0 +1,19 @@
+{
+    "engines": {
+        "node": "v20.10.0"
+    },
+    "name": "calculate",
+    "version": "1.0.0",
+    "description": "1. Создать html страницу с калькулятором    1.1 html создаёт экземпляр ws-client при подключении на сервер",
+    "main": "index.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "start": "node backend/server.js"
+    },
+    "dependencies": {
+        "express": "^4.17.1",
+        "ws": "^8.4.0"
+    },
+    "author": "",
+    "license": "ISC"
+}
