@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
+    <link rel="stylesheet" href="calculate.css">
     <meta charset="UTF-8" />
     <meta
       name="viewport"
@@ -20,33 +21,41 @@
       href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700&family=Montserrat:wght@400;700&family=Roboto:wght@100;300;400;500;700&display=swap"
       rel="stylesheet"
     />
-    <style>
-      * {
-        padding: 0;
-        margin: 0;
-      }
-      button {
-        margin: 6px;
-        width: 80px;
-        height: 80px;
-        border: none;
-        border-radius: 50%;
-      }
-      .display {
-        display: inline-block;
-        width: 430px;
-        height: 932px;
-        background-color: black;
-        text-align: center;
-      }
-    </style>
   </head>
   <body>
     <div class="display">
-      <button></button>
-      <button></button>
-      <button></button>
-      <button></button>
+      <div class="result">
+        <p class="p-result">0</p>
+      </div>
+      <div class="inputs">
+        <div class="left-operators">
+          <div class="top-operators">
+            <button>AC</button>
+            <button class="plus-minus">&#x207a;&#x2044;&#x208b;</button>
+            <button class="percent">%</button>
+          </div>
+          <div class="numbers">
+            <button>7</button>
+            <button>8</button>
+            <button>9</button>
+            <button>4</button>
+            <button>5</button>
+            <button>6</button>
+            <button>1</button>
+            <button>2</button>
+            <button>3</button>
+            <button class="zero">0</button>
+            <button class="comma">&#x2C</button>
+          </div>
+        </div>
+        <div class="right-operators">
+          <button>&#247</button>
+          <button class="mult">&times</button>
+          <button >-</button>
+          <button>+</button>
+          <button>=</button>
+        </div>
+      </div>
     </div>
   </body>
 </html>
