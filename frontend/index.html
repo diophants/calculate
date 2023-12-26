@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <link rel="stylesheet" href="calculate.css">
     <meta charset="UTF-8" />
     <meta
       name="viewport"
@@ -25,7 +24,7 @@
   <body>
     <div class="display">
       <div class="result">
-        <p class="p-result">0</p>
+        <p id="output" class="p-result">0</p>
       </div>
       <div class="inputs">
         <div class="left-operators">
@@ -41,8 +40,8 @@
             <button>4</button>
             <button>5</button>
             <button>6</button>
-            <button>1</button>
-            <button>2</button>
+            <button id="1">1</button>
+            <button id="2">2</button>
             <button>3</button>
             <button class="zero">0</button>
             <button class="comma">&#x2C</button>
@@ -51,11 +50,82 @@
         <div class="right-operators">
           <button>&#247</button>
           <button class="mult">&times</button>
-          <button >-</button>
-          <button>+</button>
-          <button>=</button>
+          <button id="minus">-</button>
+          <button id="plus">+</button>
+          <button id="equally">=</button>
         </div>
       </div>
     </div>
+    <script>
+      const socket = new WebSocket('ws://localhost:3001')
+      let cells = []
+      
+      const output = document.getElementById('output')
+      const input1 = document.getElementById('1')
+      const input2 = document.getElementById('2')
+      const plus = document.getElementById('plus')
+      const equally = document.getElementById('equally')
+      
+      socket.addEventListener('message', ({data}) => {
+        const change = JSON.parse(data)
+        cells = change.cells
+        if (cells.length !== 1) output.textContent = cells.join('')
+        else output.textContent = cells
+      })
+
+      const calculation = (arr) => {
+        const expression = arr.join('')
+        const res = eval(expression)
+        return res
+      } 
+
+      input1.addEventListener('click', () => {
+        cells.push(1)
+        output.textContent = cells.join('')
+        socket.send(JSON.stringify({
+          value: '1',
+          cells,
+        }))
+      });
+      input2.addEventListener('click', () => {
+        cells.push(2)
+        output.textContent = cells.join('')
+        socket.send(JSON.stringify({
+          value: '2',
+          cells,
+        }))
+      })
+      plus.addEventListener('click', () => {
+        if (cells[cells.length - 1] === '+') return
+        if (cells.length === 0) cells.push(0)
+        cells.push('+')
+        output.textContent = cells.join('')
+        socket.send(JSON.stringify({
+          value: '+',
+          cells,
+        }))
+      })
+      
+      minus.addEventListener('click', () => {
+        if (cells[cells.length - 1] === '-') return
+        if (cells.length === 0) cells.push(0)
+        cells.push('-')
+        output.textContent = cells.join('')
+        socket.send(JSON.stringify({
+          value: '-',
+          cells,
+        }))
+      })
+      
+      equally.addEventListener('click', () => {
+        if (typeof cells[cells.length - 1] !== 'number') return
+        cells = [calculation(cells)]
+        output.textContent = cells
+        socket.send(JSON.stringify({
+          value: '=',
+          cells,
+        }))
+      })
+    </script>
   </body>
 </html>
