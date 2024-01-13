@@ -75,11 +75,13 @@ button:active {
   color: rgb(238, 237, 238);
 }
 .plus-minus {
+  opacity: 0.3;
   padding-top: 5px;
   padding-right: 6px;
   letter-spacing: -6px;
 }
 .percent {
+  opacity: 0.3;
   padding-top: 3px;
 }
 .mult {

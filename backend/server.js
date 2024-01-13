@@ -4,7 +4,7 @@ const fs = require('node:fs');
 const http = require('node:http');
 const WebSocket = require('ws');
 
-const PORT = 3001;
+const PORT = 3000;
 
 const index = fs.readFileSync(
   '../frontend/index.html',
