@@ -29,30 +29,30 @@
       <div class="inputs">
         <div class="left-operators">
           <div class="top-operators">
-            <button>AC</button>
+            <button id="clear">AC</button>
             <button class="plus-minus">&#x207a;&#x2044;&#x208b;</button>
             <button class="percent">%</button>
           </div>
           <div class="numbers">
-            <button>7</button>
-            <button>8</button>
-            <button>9</button>
-            <button>4</button>
-            <button>5</button>
-            <button>6</button>
+            <button id="7">7</button>
+            <button id="8">8</button>
+            <button id="9">9</button>
+            <button id="4">4</button>
+            <button id="5">5</button>
+            <button id="6">6</button>
             <button id="1">1</button>
             <button id="2">2</button>
-            <button>3</button>
-            <button class="zero">0</button>
-            <button class="comma">&#x2C</button>
+            <button id="3">3</button>
+            <button class="zero" id="0">0</button>
+            <button class="comma" id=".">&#x2C</button>
           </div>
         </div>
         <div class="right-operators">
-          <button>&#247</button>
-          <button class="mult">&times</button>
-          <button id="minus">-</button>
-          <button id="plus">+</button>
-          <button id="equally">=</button>
+          <button id="/">&#247</button>
+          <button class="mult" id="*">&times</button>
+          <button id="-">-</button>
+          <button id="+">+</button>
+          <button id="=">=</button>
         </div>
       </div>
     </div>
@@ -61,11 +61,7 @@
       let cells = []
       
       const output = document.getElementById('output')
-      const input1 = document.getElementById('1')
-      const input2 = document.getElementById('2')
-      const plus = document.getElementById('plus')
-      const equally = document.getElementById('equally')
-      
+
       socket.addEventListener('message', ({data}) => {
         const change = JSON.parse(data)
         cells = change.cells
@@ -78,54 +74,50 @@
         const res = eval(expression)
         return res
       } 
+      
+      const buttons = document.querySelectorAll('button[id]')
 
-      input1.addEventListener('click', () => {
-        cells.push(1)
-        output.textContent = cells.join('')
-        socket.send(JSON.stringify({
-          value: '1',
-          cells,
-        }))
-      });
-      input2.addEventListener('click', () => {
-        cells.push(2)
-        output.textContent = cells.join('')
-        socket.send(JSON.stringify({
-          value: '2',
-          cells,
-        }))
-      })
-      plus.addEventListener('click', () => {
-        if (cells[cells.length - 1] === '+') return
-        if (cells.length === 0) cells.push(0)
-        cells.push('+')
-        output.textContent = cells.join('')
-        socket.send(JSON.stringify({
-          value: '+',
-          cells,
-        }))
-      })
-      
-      minus.addEventListener('click', () => {
-        if (cells[cells.length - 1] === '-') return
-        if (cells.length === 0) cells.push(0)
-        cells.push('-')
-        output.textContent = cells.join('')
-        socket.send(JSON.stringify({
-          value: '-',
-          cells,
-        }))
-      })
-      
-      equally.addEventListener('click', () => {
-        if (typeof cells[cells.length - 1] !== 'number') return
-        cells = [calculation(cells)]
-        output.textContent = cells
-        socket.send(JSON.stringify({
-          value: '=',
-          cells,
-        }))
-      })
+      buttons.forEach(button => {button.addEventListener('click', () => {
+        const value = button.id;
+        const signs = ['/', '+', '-', '*', '.']
+        if (!isNaN(value)) {
+          if (cells.length === 1 && cells[0] === 0) cells.shift()
+          cells.push(Number(value));
+          output.textContent = cells.join('')
+          socket.send(JSON.stringify({
+            value,
+            cells
+          }))
+        }
+        if (signs.some(el => el === value)) {
+          if (signs.some(el => el === cells[cells.length - 1])) return
+          if (cells.length === 0) cells.push(0)
+          cells.push(value)
+          output.textContent = cells.join('')
+          socket.send(JSON.stringify({
+            value: value,
+            cells,
+          }))
+        }
+        if (value === '=') {
+          if (typeof cells[cells.length - 1] !== 'number') return
+          cells = [calculation(cells)]
+          output.textContent = cells
+          socket.send(JSON.stringify({
+            value: '=',
+            cells,
+          }))
+        }
+        if (value === 'clear') {
+          console.log(value)
+          cells = [0];
+          output.textContent = 0
+          socket.send(JSON.stringify({
+            value: 0,
+            cells
+          }))
+        }
+      })})
     </script>
   </body>
 </html>
