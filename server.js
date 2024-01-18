@@ -1,73 +1,105 @@
 'use strict';
 
-// создать одностраничное приложение с навигацией по влкадкам
-// возможность обновлять файлы не перезагружая сервер
-
-const fs = require('node:fs');
 const http = require('node:http');
-const WebSocket = require('ws');
 const path = require('node:path');
+const fs = require('node:fs');
+const WebSocket = require('ws');
 
-const PORT = 3000;
+const PORT = 8000;
 
 const STATIC_PATH = path.join(process.cwd(), './static');
+const API_PATH = path.join(process.cwd(), './api');
+
+const api = new Map();
 
 const MIME_TYPE = {
+  default: 'application/octet-stream',
   html: 'text/html; charset=UTF-8',
   js: 'application/javascript; charset=UTF-8',
+  json: 'application/json',
   css: 'text/css',
-  ico: 'image/x-icon',
   png: 'image/png',
   jpg: 'image/jpeg',
-  default: 'text/plain',
+  gif: 'image/gif',
+  ico: 'image/x-icon',
+  text: 'text/plain',
 };
 
-const serveFile = (name) => {
+const prepareFile = async (url) => {
+  const name = url === '/' ? '/index.html' : url;
   const filePath = path.join(STATIC_PATH, name);
-  if (!filePath.startsWith(STATIC_PATH)) {
-    console.log(`file path ${name} is not valid`);
-    return null;
-  }
-  const stream = fs.createReadStream(filePath);
-  return stream;
+  const pathTraversal = !filePath.startsWith(STATIC_PATH);
+  const exists = await fs.promises.access(filePath).then(
+    () => true,
+    () => false
+  );
+  const found = !pathTraversal && exists;
+  const streamPath = found ? filePath : STATIC_PATH + '/404.html';
+  const ext = path.extname(streamPath).substring(1).toLocaleLowerCase();
+  const stream = fs.createReadStream(streamPath);
+  return { found, ext, stream };
 };
 
-const server = http.createServer((req, res) => {
-  const { url } = req;
-  let name = url === '/' ? 'index.html' : url;
-  const filePath = path.join(STATIC_PATH, name);
-  let statusCode = 200;
-  if (!fs.existsSync(filePath)) {
-    name = '404.html';
-    statusCode = 404;
+const cacheFile = async (name) => {
+  const key = path.basename(name, '.js');
+  try {
+    const libCache = require.resolve(`${API_PATH}/${name}`);
+    delete require.cache[libCache];
+  } catch (e) {
+    return;
   }
-  const ext = path.extname(name).substring(1);
-  const mimeType = MIME_TYPE[ext] || MIME_TYPE.default;
-  res.writeHead(statusCode, { 'Content-Type': mimeType });
-  const stream = serveFile(name);
-  if (stream) {
-    stream.pipe(res);
+  try {
+    const value = require(`${API_PATH}/${name}`);
+    api.set(key, value);
+  } catch (e) {
+    api.delete(key);
+  }
+};
+
+fs.readdir(API_PATH, (err, files) => {
+  for (const file of files) {
+    cacheFile(file);
   }
 });
 
-server.listen(PORT, () => {
-  console.log(`Server is run: http://localhost:${PORT}`);
+fs.watch(API_PATH, (err, file) => {
+  cacheFile(file);
 });
 
-const ws = new WebSocket.Server({ server });
+const parseArgs = async (req) => {
+  const buffer = [];
+  for await (const chunk of req) buffer.unshift(chunk);
+  const data = Buffer.concat(buffer).toString();
+  return JSON.parse(data);
+};
 
-ws.on('connection', (connection, req) => {
-  const id = req.socket.remoteAddress;
-  console.log(`Connected: ${id}`);
-  connection.on('message', (message) => {
-    console.log(`Send message: ${message}`);
-    for (const client of ws.clients) {
-      if (client.readyState !== WebSocket.OPEN) continue;
-      if (connection === client) continue;
-      client.send(message, { binary: false });
+const httpError = (res, status, message) => {
+  res.statusCode = status;
+  res.end(`"${message}"`);
+};
+
+const server = http.createServer(async (req, res) => {
+  const url = req.url === '/' ? '/index.html' : req.url;
+  const [first, second] = url.substring(1).split('/');
+  if (first === 'api') {
+    const method = api.get(second);
+    const args = await parseArgs(req);
+    try {
+      const result = await method(...args);
+      res.end(JSON.stringify(result));
+    } catch (e) {
+      httpError(res, 500, `method ${second} is not found`);
     }
-  });
-  connection.on('close', () => {
-    console.log(`Disconnect: ${id}`);
-  });
+  } else {
+    const file = await prepareFile(req.url);
+    const statusCode = file.found ? 200 : 404;
+    const mimeType = MIME_TYPE[file.ext] || MIME_TYPE.default;
+    res.writeHead(statusCode, { 'Content-Type': mimeType });
+    file.stream.pipe(res);
+    console.log(`${req.method} ${req.url} ${statusCode}`);
+  }
 });
+
+server.listen(PORT, () =>
+  console.log(`Server is running: http://localhost:${PORT}`)
+);
