@@ -103,3 +103,17 @@ const server = http.createServer(async (req, res) => {
 server.listen(PORT, () =>
   console.log(`Server is running: http://localhost:${PORT}`)
 );
+
+const ws = new WebSocket.Server({ server });
+
+ws.on('connection', (connect, req) => {
+  // Routing
+  console.log(req.url);
+  connect.on('message', (data) => {
+    const listConection = ws.clients;
+    // console.log(listConection.size);
+    // принимаем объект, в зависимости от url обрабатываем
+    // отправлять сообщение всем тем, кто имеет такой же url адрес
+    console.log(data.toString());
+  });
+});

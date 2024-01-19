@@ -1,8 +1,22 @@
-module.exports = () => {
-  const output = document.getElementById('output');
-  output.innerHTML = '';
-  for (i = 0; i < 10; i++) {
-    output.innerHTML += `<button>${i}</button>`;
+module.exports = function (name) {
+  if (!arguments.length) {
+    return [
+      ['one', '1'],
+      ['two', '2'],
+      ['three', '3'],
+      ['four', '4'],
+      ['five', '5'],
+      ['six', '6'],
+      ['seven', '7'],
+      ['eight', '8'],
+      ['nine', '9'],
+      ['zero', '0'],
+      ['div', '/'],
+      ['mult', '*'],
+      ['minus', '-'],
+      ['plus', '+'],
+      ['dot', '.'],
+      ['equally', '='],
+    ];
   }
-  return output;
 };
