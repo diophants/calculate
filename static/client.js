@@ -1,6 +1,5 @@
 'use strict';
 
-// формируем API
 const api = {};
 const buildApi = (methods) => {
   for (const method of methods) {
@@ -50,23 +49,17 @@ async function calculateRender() {
   view.innerHTML = '<div id="calculate"></div>';
   const input = document.getElementById('calculate');
   input.innerHTML =
-    '<button id="back" class="calculate-symbol"><-</button><div id="output" class="calculate-display">404</div>';
+    '<button id="back" class="calculate-symbol"><-</button><div id="output" class="calculate-display"></div>';
   const numbers = await api.calculate();
   for (let i = 1; i < numbers.length + 1; i++) {
     const [id, view] = numbers[i - 1];
-
-    if (view === '0') {
-      input.innerHTML += `<button style="display: block; margin-left: 65px; margin-bottom: 65px;" class="calculate-symbol" id="${id}">${view}</button>`;
-      continue;
-    }
     input.innerHTML += `<button class="calculate-symbol" id="${id}">${view}</button>`;
-    if (i % 3 === 0 && i < 10) {
+    if (i % 3 === 0) {
       input.innerHTML += '<p></p>';
+      if (i === 12) {
+        input.innerHTML += '<p style="margin-bottom: 35px;"></p>';
+      }
       continue;
-    }
-    const index = i - 1;
-    if (i > 10 && index % 3 === 0) {
-      input.innerHTML += '<p></p>';
     }
   }
   const output = document.getElementById('output');
@@ -84,22 +77,21 @@ async function exchangeRateRender() {
   return { input, output };
 }
 
-// сделать универсальную функцию
-async function factory(name) {
-  const { input, output } = await window[`${name}Render`]();
-  const socket = new WebSocket(`ws://localhost:8000/${name}`);
+async function factory(nameApp) {
+  const { input, output } = await window[`${nameApp}Render`]();
+  const socket = new WebSocket(`ws://localhost:8000/${nameApp}`);
 
-  const handler = (data) => {
+  function handler(data) {
     const id = data.target.id;
-    // мы хотим отправить запрос на сервер, но обработка должна произойти в api
-    socket.send(id); // отправляем данные в виде объекта
-    output.innerHTML += id;
+    const value = data.target.innerText;
+    socket.send(id);
+    output.innerHTML += value;
     if (id === 'back') {
       removeEventListener('click', handler);
       menuRender();
       socket.close();
     }
-  };
+  }
 
   input.addEventListener('click', handler);
 }

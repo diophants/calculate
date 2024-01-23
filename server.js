@@ -109,11 +109,20 @@ const ws = new WebSocket.Server({ server });
 ws.on('connection', (connect, req) => {
   // Routing
   console.log(req.url);
-  connect.on('message', (data) => {
+  connect.on('message', async (data) => {
+    if (req.url === '/calculate') {
+      const method = api.get('calculate');
+      const arg = data.toString();
+      const res = await method(arg);
+      console.log(res);
+      // console.log('url:', req.url);
+      // console.log('data :', data.toString());
+    }
     const listConection = ws.clients;
     // console.log(listConection.size);
     // принимаем объект, в зависимости от url обрабатываем
     // отправлять сообщение всем тем, кто имеет такой же url адрес
-    console.log(data.toString());
   });
 });
+
+const name = 'mult';

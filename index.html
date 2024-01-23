@@ -6,8 +6,14 @@
     <title>Document</title>
   </head>
   <body>
-    <div class="output" id="output">
-      <button id="but">Press</button>
-    </div>
+    <div id="output"></div>
+    <script>
+      const output = document.getElementById('output');
+      const button = document.createElement('button');
+      button.id = 10;
+      button.innerText = 10;
+      button.className = 'ten';
+      output.appendChild(button);
+    </script>
   </body>
 </html>
