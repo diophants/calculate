@@ -1,4 +1,5 @@
 //создать ws://localhost:8000/calculator
+const expression = [];
 class ParseMethod {
   coll(key) {
     key = this[key];
@@ -7,13 +8,13 @@ class ParseMethod {
     }
   }
   one() {
-    return 1;
+    expression.push(1);
   }
   two() {
-    return 2;
+    expression.push(2);
   }
   three() {
-    return 3;
+    expression.push(3);
   }
   mult() {
     return 10;
@@ -21,7 +22,7 @@ class ParseMethod {
   exp() {}
 }
 
-const expressions = [
+const chars = [
   ['one', '1'],
   ['two', '2'],
   ['three', '3'],
@@ -41,10 +42,10 @@ const expressions = [
   ['div', '/'],
 ];
 
-const method = new ParseMethod(expressions);
+const method = new ParseMethod(chars);
 module.exports = function (name) {
   if (!arguments.length) {
-    return expressions;
+    return chars;
   }
 
   return method.coll(name);

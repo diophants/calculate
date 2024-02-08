@@ -25,6 +25,8 @@ const MIME_TYPE = {
   text: 'text/plain',
 };
 
+//Static
+
 const prepareFile = async (url) => {
   const name = url === '/' ? '/index.html' : url;
   const filePath = path.join(STATIC_PATH, name);
@@ -40,6 +42,7 @@ const prepareFile = async (url) => {
   return { found, ext, stream };
 };
 
+// API
 const cacheFile = async (name) => {
   const key = path.basename(name, '.js');
   try {
@@ -78,10 +81,13 @@ const httpError = (res, status, message) => {
   res.end(`"${message}"`);
 };
 
+// Create server
+
 const server = http.createServer(async (req, res) => {
   const url = req.url === '/' ? '/index.html' : req.url;
   const [first, second] = url.substring(1).split('/');
   if (first === 'api') {
+    // если рендрим меню, api.keys()
     const method = api.get(second);
     const args = await parseArgs(req);
     try {
@@ -107,7 +113,6 @@ server.listen(PORT, () =>
 const ws = new WebSocket.Server({ server });
 
 ws.on('connection', (connect, req) => {
-  // Routing
   console.log(req.url);
   connect.on('message', async (data) => {
     if (req.url === '/calculate') {
@@ -115,14 +120,6 @@ ws.on('connection', (connect, req) => {
       const arg = data.toString();
       const res = await method(arg);
       console.log(res);
-      // console.log('url:', req.url);
-      // console.log('data :', data.toString());
     }
-    const listConection = ws.clients;
-    // console.log(listConection.size);
-    // принимаем объект, в зависимости от url обрабатываем
-    // отправлять сообщение всем тем, кто имеет такой же url адрес
   });
 });
-
-const name = 'mult';
