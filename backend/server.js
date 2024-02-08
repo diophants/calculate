@@ -6,15 +6,9 @@ const WebSocket = require('ws');
 
 const PORT = 3001;
 
-const index = fs.readFileSync(
-  '../frontend/index.html',
-  'utf-8'
-);
+const index = fs.readFileSync('../frontend/index.html', 'utf-8');
 
-const css = fs.readFileSync(
-  '../frontend/calculate.css',
-  'utf-8'
-);
+const css = fs.readFileSync('../frontend/calculate.css', 'utf-8');
 
 const server = http.createServer((req, res) => {
   res.writeHead(200);
